@@ -27,6 +27,9 @@ dependencies {
     implementation("io.projectreactor.kotlin:reactor-kotlin-extensions")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
+    implementation("org.springframework.boot:spring-boot-starter-validation")
+    implementation("org.bouncycastle:bcprov-jdk18on:1.81")
+    implementation("io.jsonwebtoken:jjwt:0.12.6")
     runtimeOnly("com.h2database:h2")
     runtimeOnly("io.r2dbc:r2dbc-h2")
     runtimeOnly("org.postgresql:postgresql")
@@ -35,6 +38,7 @@ dependencies {
     testImplementation("io.projectreactor:reactor-test")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test")
+    implementation("org.springframework.security:spring-security-crypto")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
