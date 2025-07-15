@@ -1,0 +1,47 @@
+services:
+  authentication-one-gate-payment-db:
+    container_name: authentication-one-gate-payment-db
+    image: postgres:latest
+    restart: always
+    environment:
+      POSTGRES_USER: developer
+      POSTGRES_PASSWORD: developer123
+      POSTGRES_DB: one_gate_payment
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    ports:
+      - "5432:5432"
+    volumes:
+      - one_gate_payment_data:/var/lib/postgresql/data
+
+  flyway:
+    container_name: flyway
+    image: flyway/flyway
+    depends_on:
+      authentication-one-gate-payment-db:
+        condition: service_healthy
+    volumes:
+      - ./migrations:/flyway/sql
+    command: |
+      -url=jdbc:postgresql://authentication-one-gate-payment-db:5432/one_gate_payment -user=developer -password=developer123 migrate
+
+  authentication-one-gate-payment:
+    container_name: authentication-one-gate-payment
+    restart: always
+    depends_on:
+      - authentication-one-gate-payment-db
+      - flyway
+    environment:
+      PROFILE_MODE: local
+    ports:
+      - "8081:8080"
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    image: "authentication-one-gate-payment:latest"
+
+volumes:
+  one_gate_payment_data:
