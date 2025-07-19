@@ -3,6 +3,7 @@ package id.co.bni.paymentauthenticationservice.domains.services
 import id.co.bni.paymentauthenticationservice.applications.controllers.dtos.AuthResponse
 import id.co.bni.paymentauthenticationservice.commons.configs.JwtProperties
 import id.co.bni.paymentauthenticationservice.commons.exceptions.APIException
+import id.co.bni.paymentauthenticationservice.commons.logger.Loggable
 import id.co.bni.paymentauthenticationservice.domains.dtos.TokenResponse
 import id.co.bni.paymentauthenticationservice.domains.dtos.UserAuth
 import id.co.bni.paymentauthenticationservice.domains.entities.Authentication
@@ -28,7 +29,7 @@ class AuthServiceImpl(
     private val authenticationRepository: AuthenticationRepository,
     private val jwtProperties: JwtProperties,
 ) :
-    AuthService {
+    AuthService, Loggable {
     override suspend fun authenticate(user: UserAuth): AuthResponse = withContext(Dispatchers.Default) {
         val existedUser = userService.getByUsername(user.username) ?: throw APIException.UnauthenticatedException(
             message = "invalid email or password"
@@ -86,9 +87,9 @@ class AuthServiceImpl(
     }
 
     override suspend fun refresh(refreshToken: String): TokenResponse? = try {
-        val email = tokenManager.extractEmail(secretKey = jwtProperties.refreshSecret, refreshToken)
-        email?.let {
-            val currentUser = userService.getByUsername(email)
+        val username = tokenManager.extractUsername(secretKey = jwtProperties.refreshSecret, refreshToken)
+        username?.let {
+            val currentUser = userService.getByUsername(username)
                 ?: throw APIException.UnauthenticatedException(
                     message = "token is invalid or expired"
                 )
@@ -96,11 +97,13 @@ class AuthServiceImpl(
                 authenticationRepository.isExists(refreshToken)
             }
 
+            log.debug("refresh token exists: {}, email: {}, currentUser: {}", isRefreshTokenExists, username, currentUser)
+
             if (isRefreshTokenExists && tokenManager.isValid(
                     secretKey = jwtProperties.refreshSecret,
                     refreshToken,
                     currentUser
-                ) && email == currentUser.email
+                ) && username == currentUser.username
             ) {
                 val accessToken = tokenManager.generate(
                     secretKey = jwtProperties.accessSecret,
