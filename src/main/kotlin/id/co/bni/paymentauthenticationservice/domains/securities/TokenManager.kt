@@ -20,5 +20,5 @@ interface TokenManager {
     ): String
 
     fun isValid(secretKey: String, token: String, user: User): Boolean
-    fun extractEmail(secretKey: String, token: String): String?
+    fun extractUsername(secretKey: String, token: String): String?
 }

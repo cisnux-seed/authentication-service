@@ -56,11 +56,11 @@ class JwtManager : TokenManager {
         token: String,
         user: User
     ): Boolean {
-        val email = extractEmail(secretKey, token)
-        return email != null && email == user.email && !isExpired(secretKey, token)
+        val username = extractUsername(secretKey, token)
+        return username != null && username == user.username && !isExpired(secretKey, token)
     }
 
-    override fun extractEmail(secretKey: String, token: String): String? = getAllClaims(secretKey, token)
+    override fun extractUsername(secretKey: String, token: String): String? = getAllClaims(secretKey, token)
         .subject
 
     private fun isExpired(secretKey: String, token: String): Boolean = getAllClaims(secretKey, token)
