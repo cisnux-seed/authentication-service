@@ -10,7 +10,7 @@ api_keys ||--o{ api_access_logs : generates
 external_services ||--o{ api_access_logs : accesses
 
     users {
-        long id PK "v7"
+        long id PK
         varchar email UK "not null unique"
         varchar username UK "not null unique"
         varchar password "be hashed"
@@ -25,7 +25,7 @@ external_services ||--o{ api_access_logs : accesses
     }
 
     accounts {
-        long id PK "v7"
+        varchar id PK "UUID v4"
         long user_id FK "not null unique"
         decimal balance "default 0.00"
         varchar currency "default IDR"
@@ -35,9 +35,9 @@ external_services ||--o{ api_access_logs : accesses
     }
 
     historical_transactions {
-        long id PK "v7"
+        varchar id PK "UUID v4"
         long user_id FK "not null"
-        long account_id FK "not null"
+        varchar account_id FK "not null"
         varchar transaction_id UK "unique reference"
         varchar transaction_type "TOPUP,PAYMENT,REFUND,TRANSFER"
         varchar transaction_status "PENDING,SUCCESS,FAILED,CANCELLED"
@@ -55,7 +55,7 @@ external_services ||--o{ api_access_logs : accesses
     }
 
     external_services {
-        long id PK "v7"
+        varchar id PK "UUID v4"
         varchar company UK "not null unique"
         varchar service_type "default HISTORICAL_TRANSACTION"
         varchar contact_email "not null"
@@ -66,12 +66,13 @@ external_services ||--o{ api_access_logs : accesses
     }
 
     api_keys {
-        long id PK "v7"
-        long external_service_id FK "not null"
+        varchar id PK "UUID v4"
+        varchar external_service_id FK "not null"
         varchar key_name "not null"
         varchar api_key UK "unique hashed key"
         varchar permissions "READ_TRANSACTIONS,READ_REPORTS"
-        varchar rate_limit "requests per minute"
+        int rate_limit_count "num of requests"
+        varchar rate_limit_unit "rate limit unit"
         datetime expires_at "expiration date"
         boolean is_active "default true"
         timestamp created_at "default now()"
@@ -79,9 +80,9 @@ external_services ||--o{ api_access_logs : accesses
     }
 
     api_access_logs {
-        long id PK "v7"
-        long external_service_id FK "not null"
-        long api_key_id FK "not null"
+        varchar id PK "UUID v4"
+        varchar external_service_id FK "not null"
+        varchar api_key_id FK "not null"
         varchar endpoint "accessed endpoint"
         varchar http_method "GET,POST,PUT,DELETE"
         varchar ip_address "client IP"
