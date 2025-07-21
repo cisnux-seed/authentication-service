@@ -20,13 +20,14 @@ class JwtManager : TokenManager {
     ): String {
         val secretKeyBytes = secretKey.toByteArray()
         val secret = Keys.hmacShaKeyFor(secretKeyBytes)
+        val allClaims = additionalClaims.toMutableMap()
+        allClaims["sub"] = user.username
+        allClaims["iss"] = "https://bni.co.id"
+        allClaims["iat"] = Date.from(Instant.now())
+        allClaims["exp"] = Date.from(expirationDate)
+
         return Jwts.builder()
-            .claims()
-            .subject(user.username)
-            .issuedAt(Date.from(Instant.now()))
-            .expiration(Date.from(expirationDate))
-            .add(additionalClaims)
-            .and()
+            .claims(allClaims)
             .signWith(secret)
             .compact()
     }
@@ -39,13 +40,14 @@ class JwtManager : TokenManager {
     ): String {
         val secretKeyBytes = secretKey.toByteArray()
         val secret = Keys.hmacShaKeyFor(secretKeyBytes)
+        val allClaims = additionalClaims.toMutableMap()
+        allClaims["sub"] = user.username
+        allClaims["iss"] = "https://bni.co.id"
+        allClaims["iat"] = Date.from(Instant.now())
+        allClaims["exp"] = Date.from(expirationDate)
+
         return Jwts.builder()
-            .claims()
-            .subject(user.email)
-            .issuedAt(Date.from(Instant.now()))
-            .expiration(Date.from(expirationDate))
-            .add(additionalClaims)
-            .and()
+            .claims(allClaims)
             .signWith(secret)
             .compact()
     }

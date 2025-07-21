@@ -34,7 +34,8 @@ class AuthController(private val authService: AuthService) : Loggable {
         Dispatchers.Default
     ) {
         val user = User(
-            username = userRegister.username, email = userRegister.email, password = userRegister.password
+            username = userRegister.username, email = userRegister.email, password = userRegister.password,
+            phone = userRegister.phone
         )
         val userId = authService.register(user)
 

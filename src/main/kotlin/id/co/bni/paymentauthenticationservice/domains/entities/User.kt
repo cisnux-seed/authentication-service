@@ -10,6 +10,7 @@ data class User(
     @Id
     val id: Long? = null,
     val username: String,
+    val phone: String,
     val email: String,
     val password: String,
     @Column("created_at")

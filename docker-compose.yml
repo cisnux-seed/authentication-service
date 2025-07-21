@@ -1,6 +1,6 @@
 services:
-  authentication-one-gate-payment-db:
-    container_name: authentication-one-gate-payment-db
+  one-gate-payment-db:
+    container_name: one-gate-payment-db
     image: postgres:latest
     restart: always
     environment:
@@ -21,18 +21,18 @@ services:
     container_name: flyway
     image: flyway/flyway
     depends_on:
-      authentication-one-gate-payment-db:
+      one-gate-payment-db:
         condition: service_healthy
     volumes:
       - ./migrations:/flyway/sql
     command: |
-      -url=jdbc:postgresql://authentication-one-gate-payment-db:5432/one_gate_payment -user=developer -password=developer123 migrate
+      -url=jdbc:postgresql://one-gate-payment-db:5432/one_gate_payment -user=developer -password=developer123 migrate
 
   authentication-one-gate-payment:
     container_name: authentication-one-gate-payment
     restart: always
     depends_on:
-      - authentication-one-gate-payment-db
+      - one-gate-payment-db
       - flyway
     environment:
       PROFILE_MODE: local

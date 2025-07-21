@@ -17,6 +17,12 @@ data class UserRegister(
         message = "username cannot be more than 255 characters"
     )
     val username: String,
+    @field:NotBlank(message = "phone cannot be blank")
+    @field:Size(
+        max = 20,
+        message = "phone cannot be more than 20 characters"
+    )
+    val phone: String,
     @field:NotBlank(message = "password cannot be blank")
     @field:Size(
         max = 255,
