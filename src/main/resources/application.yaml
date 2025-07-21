@@ -1,6 +1,14 @@
 spring:
   application:
-    name: one-gate-payment
+    name: authentication
+  webflux:
+    static-path-pattern: ""
+  web:
+    resources:
+      add-mappings: false
+      static-locations: [ ]
+      cache:
+        period: 0
   jackson:
     property-naming-strategy: SNAKE_CASE
   main:
