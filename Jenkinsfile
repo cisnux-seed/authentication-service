@@ -5,49 +5,84 @@ pipeline {
         REGISTRY = 'image-registry.openshift-image-registry.svc:5000'
         NAMESPACE = 'one-gate-payment'
         APP_NAME = 'authentication-service'
-        // Update this version when you want to release a new version
         SEMANTIC_VERSION = '1.0.0'
     }
 
     stages {
         stage('Cleanup Workspace') {
             steps {
-                cleanWs()
-            }
-        }
-
-        stage('Build Docker Images') {
-            steps {
                 script {
-                    echo "Building Docker image with tags: latest and ${SEMANTIC_VERSION}"
-
-                    sh """
-                        # Build the image
-                        podman build -t ${APP_NAME}:latest .
-
-                        # Tag with semantic version
-                        podman tag ${APP_NAME}:latest ${APP_NAME}:${SEMANTIC_VERSION}
-
-                        # Tag for registry with both versions
-                        podman tag ${APP_NAME}:latest ${REGISTRY}/${NAMESPACE}/${APP_NAME}:latest
-                        podman tag ${APP_NAME}:latest ${REGISTRY}/${NAMESPACE}/${APP_NAME}:${SEMANTIC_VERSION}
-                    """
+                    // Simple cleanup without cleanWs plugin
+                    sh '''
+                        rm -rf target/ || true
+                        rm -rf build/ || true
+                        rm -rf .gradle/ || true
+                        find . -name "*.jar" -delete || true
+                        echo "Workspace cleaned"
+                    '''
                 }
             }
         }
 
-        stage('Push to Registry') {
+        stage('Build with OpenShift BuildConfig') {
             steps {
                 script {
-                    echo "Pushing both latest and ${SEMANTIC_VERSION} tags to registry..."
+                    echo "Triggering OpenShift build for ${APP_NAME}:${SEMANTIC_VERSION}"
 
                     sh """
-                        TOKEN=\$(oc whoami -t)
-                        echo \$TOKEN | podman login -u jenkins --password-stdin ${REGISTRY}
+                        # Switch to the correct project
+                        oc project ${NAMESPACE}
 
-                        # Push both tags
-                        podman push ${REGISTRY}/${NAMESPACE}/${APP_NAME}:latest
-                        podman push ${REGISTRY}/${NAMESPACE}/${APP_NAME}:${SEMANTIC_VERSION}
+                        # Create or update BuildConfig if needed
+                        oc apply -f - <<EOF
+apiVersion: build.openshift.io/v1
+kind: BuildConfig
+metadata:
+  name: ${APP_NAME}
+  namespace: ${NAMESPACE}
+  labels:
+    app: ${APP_NAME}
+spec:
+  source:
+    type: Git
+    git:
+      uri: https://github.com/cisnux-seed/authentication-service.git
+      ref: main
+  strategy:
+    type: Docker
+    dockerStrategy:
+      dockerfilePath: Dockerfile
+  output:
+    to:
+      kind: ImageStreamTag
+      name: ${APP_NAME}:latest
+  triggers:
+  - type: Manual
+  runPolicy: Serial
+EOF
+
+                        # Create or update ImageStream
+                        oc apply -f - <<EOF
+apiVersion: image.openshift.io/v1
+kind: ImageStream
+metadata:
+  name: ${APP_NAME}
+  namespace: ${NAMESPACE}
+  labels:
+    app: ${APP_NAME}
+spec:
+  lookupPolicy:
+    local: false
+EOF
+
+                        # Start the build
+                        echo "Starting OpenShift build..."
+                        oc start-build ${APP_NAME} --wait --follow
+
+                        # Tag the built image with semantic version
+                        oc tag ${APP_NAME}:latest ${APP_NAME}:${SEMANTIC_VERSION}
+
+                        echo "✅ Build completed with tags: latest and ${SEMANTIC_VERSION}"
                     """
                 }
             }
@@ -71,6 +106,8 @@ pipeline {
                         oc get pods -l app=${APP_NAME} -n ${NAMESPACE}
 
                         echo "✅ Deployed with tags: latest and ${SEMANTIC_VERSION}"
+                        echo "Images available in registry:"
+                        oc get imagestream ${APP_NAME} -o jsonpath='{.status.tags[*].tag}' | tr ' ' '\\n'
                     """
                 }
             }
@@ -78,18 +115,9 @@ pipeline {
     }
 
     post {
-        always {
-            script {
-                sh """
-                    podman rmi ${APP_NAME}:latest || true
-                    podman rmi ${APP_NAME}:${SEMANTIC_VERSION} || true
-                    podman rmi ${REGISTRY}/${NAMESPACE}/${APP_NAME}:latest || true
-                    podman rmi ${REGISTRY}/${NAMESPACE}/${APP_NAME}:${SEMANTIC_VERSION} || true
-                """
-            }
-        }
         success {
             echo "🎉 Pipeline completed successfully!"
+            echo "Application deployed using OpenShift BuildConfig"
             echo "Images available:"
             echo "  - ${APP_NAME}:latest"
             echo "  - ${APP_NAME}:${SEMANTIC_VERSION}"
@@ -98,7 +126,14 @@ pipeline {
             echo "oc port-forward svc/${APP_NAME} 8080:8080 -n ${NAMESPACE}"
         }
         failure {
-            echo "❌ Pipeline failed! Check the logs above for details."
+            script {
+                echo "❌ Pipeline failed! Check the logs above for details."
+                // Show build logs if build failed
+                sh """
+                    echo "=== Recent Build Logs ==="
+                    oc logs -l build=${APP_NAME} --tail=50 -n ${NAMESPACE} || true
+                """
+            }
         }
     }
 }
