@@ -23,7 +23,6 @@ pipeline {
                         echo "Running SAST analysis with SonarQube..."
 
                         sh """
-                            export TERM=dumb
                             gradle sonar \\
                                 -Dsonar.projectKey=authentication-service \\
                                 -Dsonar.projectName='authentication-service' \\
