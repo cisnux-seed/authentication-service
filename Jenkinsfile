@@ -9,21 +9,6 @@ pipeline {
     }
 
     stages {
-        stage('Cleanup Workspace') {
-            steps {
-                script {
-                    // Simple cleanup without cleanWs plugin
-                    sh '''
-                        rm -rf target/ || true
-                        rm -rf build/ || true
-                        rm -rf .gradle/ || true
-                        find . -name "*.jar" -delete || true
-                        echo "Workspace cleaned"
-                    '''
-                }
-            }
-        }
-
         stage('Build with OpenShift BuildConfig') {
             steps {
                 script {
@@ -88,18 +73,34 @@ EOF
             }
         }
 
-        stage('Update Deployment') {
+        stage('Apply OpenShift Resources') {
             steps {
                 script {
-                    echo "Updating deployment with latest image..."
+                    echo "Applying OpenShift resources from repository..."
 
                     sh """
                         oc project ${NAMESPACE}
 
-                        # Update the deployment with latest image
-                        oc set image deployment/${APP_NAME} ${APP_NAME}=${REGISTRY}/${NAMESPACE}/${APP_NAME}:latest -n ${NAMESPACE}
+                        # Apply the YAML files from the openshift folder in the repo
+                        oc apply -f openshift/secrets.yaml
+                        oc apply -f openshift/service.yaml
+                        oc apply -f openshift/deployment.yaml
 
-                        # Wait for rollout to complete
+                        echo "✅ OpenShift resources applied successfully"
+                    """
+                }
+            }
+        }
+
+        stage('Deploy Application') {
+            steps {
+                script {
+                    echo "Deploying application with latest image..."
+
+                    sh """
+                        oc project ${NAMESPACE}
+
+                        # Wait for rollout to complete (deployment was created/updated in previous stage)
                         oc rollout status deployment/${APP_NAME} -n ${NAMESPACE} --timeout=300s
 
                         # Show deployment status
