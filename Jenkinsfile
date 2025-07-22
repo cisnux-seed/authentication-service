@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+    tools {
+      gradle 'Gradle 8.14.3'
+    }
+
     environment {
         REGISTRY = 'image-registry.openshift-image-registry.svc:5000'
         NAMESPACE = 'one-gate-payment'
@@ -19,18 +23,12 @@ pipeline {
                         echo "Running SAST analysis with SonarQube..."
 
                         sh """
-                            # Run SonarQube analysis using podman with gradle agent
-                            podman run --rm -v \$(pwd):/workspace -w /workspace \\
-                                -e SONAR_TOKEN=\${SONAR_TOKEN} \\
-                                gradle:8.5-jdk21 \\
-                                ./gradlew sonar \\
-                                    -Dsonar.projectKey=authentication-service \\
-                                    -Dsonar.projectName='authentication-service' \\
-                                    -Dsonar.host.url=\${SONARQUBE_URL} \\
-                                    -Dsonar.token=\${SONAR_TOKEN} \\
-                                    --no-daemon
-
-                            echo "✅ SAST analysis completed"
+                            gradle sonar \\
+                                -Dsonar.projectKey=authentication-service \\
+                                -Dsonar.projectName='authentication-service' \\
+                                -Dsonar.host.url=\${SONARQUBE_URL} \\
+                                -Dsonar.token=\${SONAR_TOKEN} \\
+                                --no-daemon
                         """
                     }
                 }
