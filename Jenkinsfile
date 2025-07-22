@@ -5,6 +5,7 @@ pipeline {
         REGISTRY = 'image-registry.openshift-image-registry.svc:5000'
         NAMESPACE = 'one-gate-payment'
         APP_NAME = 'authentication-service'
+        // Update this version when you want to release a new version
         SEMANTIC_VERSION = '1.0.0'
     }
 
@@ -100,11 +101,22 @@ EOF
                     sh """
                         oc project ${NAMESPACE}
 
-                        # Wait for rollout to complete (deployment was created/updated in previous stage)
+                        # Force update the deployment to pull the new image
+                        oc set image deployment/${APP_NAME} ${APP_NAME}=${REGISTRY}/${NAMESPACE}/${APP_NAME}:latest -n ${NAMESPACE}
+
+                        # Restart the deployment to ensure new image is pulled
+                        oc rollout restart deployment/${APP_NAME} -n ${NAMESPACE}
+
+                        # Wait for rollout to complete
                         oc rollout status deployment/${APP_NAME} -n ${NAMESPACE} --timeout=300s
 
                         # Show deployment status
                         oc get pods -l app=${APP_NAME} -n ${NAMESPACE}
+
+                        # Show the image being used
+                        echo "Current deployment image:"
+                        oc get deployment ${APP_NAME} -o jsonpath='{.spec.template.spec.containers[0].image}' -n ${NAMESPACE}
+                        echo ""
 
                         echo "✅ Deployed with tags: latest and ${SEMANTIC_VERSION}"
                         echo "Images available in registry:"
