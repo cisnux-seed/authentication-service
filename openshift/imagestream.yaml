@@ -1,0 +1,19 @@
+apiVersion: image.openshift.io/v1
+kind: ImageStream
+metadata:
+  name: authentication-service
+  namespace: one-gate-payment
+  labels:
+    app: authentication-service
+spec:
+  lookupPolicy:
+    local: false
+  tags:
+    - name: latest
+      from:
+        kind: DockerImage
+        name: authentication-service:latest
+    - name: "1.0.0"
+      from:
+        kind: DockerImage
+        name: authentication-service:1.0.0

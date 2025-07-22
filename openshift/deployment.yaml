@@ -1,0 +1,82 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: authentication-service
+  namespace: one-gate-payment
+  labels:
+    app: authentication-service
+    version: "1.0.0"
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: authentication-service
+  template:
+    metadata:
+      labels:
+        app: authentication-service
+        version: "1.0.0"
+    spec:
+      containers:
+        - name: authentication-service
+          image: image-registry.openshift-image-registry.svc:5000/one-gate-payment/authentication-service:latest
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+          env:
+            - name: SERVER_PORT
+              value: "8080"
+            - name: DB_URL
+              value: "r2dbc:postgresql://postgresql-service:5432/one_gate_payment"
+            - name: DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: auth-service-secrets
+                  key: db-username
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: auth-service-secrets
+                  key: db-password
+            - name: REFRESH_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: auth-service-secrets
+                  key: refresh-secret
+            - name: ACCESS_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: auth-service-secrets
+                  key: access-secret
+            - name: ACCESS_TOKEN_EXPIRATION
+              value: "900000"
+            - name: REFRESH_TOKEN_EXPIRATION
+              value: "86400000"
+            - name: DATABASE_LOG_LEVEL
+              value: "INFO"
+            - name: SECURITY_LOG_LEVEL
+              value: "INFO"
+            - name: WEB_LOG_LEVEL
+              value: "INFO"
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8080
+            initialDelaySeconds: 60
+            periodSeconds: 30
+            timeoutSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+          imagePullPolicy: Always
