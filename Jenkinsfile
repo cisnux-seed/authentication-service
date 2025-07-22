@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+    tools {
+      gradle 'Gradle 8.14.3'
+    }
+
     environment {
         REGISTRY = 'image-registry.openshift-image-registry.svc:5000'
         NAMESPACE = 'one-gate-payment'
