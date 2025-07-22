@@ -7,9 +7,36 @@ pipeline {
         APP_NAME = 'authentication-service'
         // Update this version when you want to release a new version
         SEMANTIC_VERSION = '1.0.0'
+        // SonarQube configuration
+        SONARQUBE_URL = 'https://sonarqube.apps.ocp-one-gate-payment.skynux.fun'
     }
 
     stages {
+        stage('SAST Analysis') {
+            steps {
+                withCredentials([string(credentialsId: 'sonarqube-auth-service-token', variable: 'SONAR_TOKEN')]) {
+                    script {
+                        echo "Running SAST analysis with SonarQube..."
+
+                        sh """
+                            # Run SonarQube analysis using podman with gradle agent
+                            podman run --rm -v \$(pwd):/workspace -w /workspace \\
+                                -e SONAR_TOKEN=\${SONAR_TOKEN} \\
+                                gradle:8.5-jdk21 \\
+                                ./gradlew sonar \\
+                                    -Dsonar.projectKey=authentication-service \\
+                                    -Dsonar.projectName='authentication-service' \\
+                                    -Dsonar.host.url=\${SONARQUBE_URL} \\
+                                    -Dsonar.token=\${SONAR_TOKEN} \\
+                                    --no-daemon
+
+                            echo "✅ SAST analysis completed"
+                        """
+                    }
+                }
+            }
+        }
+
         stage('Build with OpenShift BuildConfig') {
             steps {
                 script {
