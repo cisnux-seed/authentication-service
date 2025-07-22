@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     tools {
-      gradle 'Gradle 8.14.3'
+        gradle 'Gradle 8.14.3'
     }
 
     environment {
@@ -23,12 +23,17 @@ pipeline {
                         echo "Running SAST analysis with SonarQube..."
 
                         sh """
+                            export TERM=dumb
                             gradle sonar \\
                                 -Dsonar.projectKey=authentication-service \\
                                 -Dsonar.projectName='authentication-service' \\
                                 -Dsonar.host.url=\${SONARQUBE_URL} \\
                                 -Dsonar.token=\${SONAR_TOKEN} \\
-                                --no-daemon
+                                --no-daemon \\
+                                --console=plain \\
+                                --quiet
+
+                            echo "✅ SAST analysis completed"
                         """
                     }
                 }
@@ -88,7 +93,7 @@ EOF
 
                         # Start the build
                         echo "Starting OpenShift build..."
-                        oc start-build ${APP_NAME} --wait --follow
+                        oc start-build ${APP_NAME} --wait --follow | cat
 
                         # Tag the built image with semantic version
                         oc tag ${APP_NAME}:latest ${APP_NAME}:${SEMANTIC_VERSION}
@@ -133,7 +138,7 @@ EOF
                         oc rollout restart deployment/${APP_NAME} -n ${NAMESPACE}
 
                         # Wait for rollout to complete
-                        oc rollout status deployment/${APP_NAME} -n ${NAMESPACE} --timeout=300s
+                        oc rollout status deployment/${APP_NAME} -n ${NAMESPACE} --timeout=300s | cat
 
                         # Show deployment status
                         oc get pods -l app=${APP_NAME} -n ${NAMESPACE}
