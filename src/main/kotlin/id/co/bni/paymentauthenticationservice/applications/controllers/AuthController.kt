@@ -64,7 +64,7 @@ class AuthController(private val authService: AuthService) : Loggable {
 
         WebResponse(
             meta = MetaResponse(
-                code = HttpStatus.OK.value().toString(), message = "user logged in successfully ✌️"
+                code = HttpStatus.OK.value().toString(), message = "user logged in successfully 👍🏻👍🏻🫡"
             ), data = authResp
         )
     }
