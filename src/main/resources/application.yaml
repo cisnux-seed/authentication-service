@@ -14,16 +14,16 @@ spring:
   main:
     web-application-type: reactive
   r2dbc:
-    url: ${DB_URL:r2dbc:postgresql://one-gate-payment-db:5432/one_gate_payment}
-    username: ${DB_USERNAME:developer}
-    password: ${DB_PASSWORD:developer123}
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
 server:
   port: ${SERVER_PORT:8080}
 jwt:
-  refresh-secret: ${REFRESH_SECRET:a7a54ae92226a9806c78552104b2a2f57167d630ef7a0665ef40723c2832ce7eb1ce7360de218f2a6e739ec307e4c787080a250b48d12460ba0e2c86bcafaab3}
-  access-secret: ${ACCESS_SECRET:e2926909a5c43ecea3ffa3b65fc747089755d687f401cd01e1a9372ab2d39e0700f108b7a6e739170e0cd25ef4f7bc9fdcc9b71de8d1be7e6e4490aa35d191a2}
-  access-token-expiration: ${ACCESS_TOKEN_EXPIRATION:900000} # 15 minutes
-  refresh-token-expiration: ${REFRESH_TOKEN_EXPIRATION:86400000} # 24 hours
+  refresh-secret: ${REFRESH_SECRET}
+  access-secret: ${ACCESS_SECRET}
+  access-token-expiration: ${ACCESS_TOKEN_EXPIRATION}
+  refresh-token-expiration: ${REFRESH_TOKEN_EXPIRATION}
 logging:
   level:
     org.springframework.r2dbc.core: ${DATABASE_LOG_LEVEL:DEBUG}
