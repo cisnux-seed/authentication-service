@@ -91,7 +91,7 @@ class AuthServiceImpl(
         username?.let {
             val currentUser = userService.getByUsername(username)
                 ?: throw APIException.UnauthenticatedException(
-                    message = "token is invalid or expired"
+                    message = TOKEN_EXPIRED_MESSAGE
                 )
             val isRefreshTokenExists = withContext(Dispatchers.IO){
                 authenticationRepository.isExists(refreshToken)
@@ -115,11 +115,11 @@ class AuthServiceImpl(
                 )
             } else {
                 throw APIException.UnauthenticatedException(
-                    message = "token is invalid or expired"
+                    message = TOKEN_EXPIRED_MESSAGE
                 )
             }
         } ?: throw APIException.UnauthenticatedException(
-            message = "token is invalid or expired"
+            message = TOKEN_EXPIRED_MESSAGE
         )
     } catch (_: ExpiredJwtException) {
         throw APIException.UnauthenticatedException(
@@ -138,5 +138,9 @@ class AuthServiceImpl(
 
     override suspend fun logout(refreshToken: String): Unit =
         authenticationRepository.deleteById(refreshToken)
+
+    private companion object{
+        const val TOKEN_EXPIRED_MESSAGE = "token is invalid or expired"
+    }
 
 }
