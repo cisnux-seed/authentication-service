@@ -10,6 +10,7 @@ import id.co.bni.paymentauthenticationservice.domains.dtos.UserAuth
 import id.co.bni.paymentauthenticationservice.domains.dtos.UserRegister
 import id.co.bni.paymentauthenticationservice.domains.entities.User
 import id.co.bni.paymentauthenticationservice.domains.services.AuthService
+import id.co.bni.paymentauthenticationservice.domains.services.UserService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.springframework.http.HttpStatus
@@ -24,7 +25,7 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("/api/auth")
-class AuthController(private val authService: AuthService) : Loggable {
+class AuthController(private val authService: AuthService, private val userService: UserService) : Loggable {
     @PostMapping(
         "/register", consumes = [MediaType.APPLICATION_JSON_VALUE], produces = [MediaType.APPLICATION_JSON_VALUE]
     )
@@ -37,6 +38,7 @@ class AuthController(private val authService: AuthService) : Loggable {
             username = userRegister.username, email = userRegister.email, password = userRegister.password,
             phone = userRegister.phone
         )
+        log.info(userService.toString())
         val userId = authService.register(user)
 
         log.info("user registered successfully: $userId")

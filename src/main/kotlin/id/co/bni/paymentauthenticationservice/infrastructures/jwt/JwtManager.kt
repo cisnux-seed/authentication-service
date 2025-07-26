@@ -6,11 +6,11 @@ import id.co.bni.paymentauthenticationservice.domains.securities.TokenManager
 import io.jsonwebtoken.Claims
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.security.Keys
-import org.springframework.stereotype.Service
+import org.springframework.stereotype.Component
 import java.time.Instant
 import java.util.Date
 
-@Service
+@Component
 class JwtManager : TokenManager {
     override fun generate(
         secretKey: String,
