@@ -3,40 +3,20 @@ package id.co.bni.paymentauthenticationservice.aplications.controllers
 import com.ninjasquad.springmockk.MockkBean
 import id.co.bni.paymentauthenticationservice.applications.controllers.AuthController
 import id.co.bni.paymentauthenticationservice.applications.controllers.dtos.AuthResponse
-import id.co.bni.paymentauthenticationservice.applications.controllers.dtos.WebResponse
-import id.co.bni.paymentauthenticationservice.commons.configs.JwtProperties
-import id.co.bni.paymentauthenticationservice.commons.exceptions.APIException
-import id.co.bni.paymentauthenticationservice.domains.dtos.TokenRefresh
 import id.co.bni.paymentauthenticationservice.domains.dtos.TokenResponse
-import id.co.bni.paymentauthenticationservice.domains.dtos.UserAuth
-import id.co.bni.paymentauthenticationservice.domains.dtos.UserRegister
-import id.co.bni.paymentauthenticationservice.domains.entities.User
 import id.co.bni.paymentauthenticationservice.domains.services.AuthService
 import id.co.bni.paymentauthenticationservice.domains.services.UserService
 import io.mockk.coEvery
 import io.mockk.coVerify
 import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest
-import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.context.TestConfiguration
-import org.springframework.context.annotation.Bean
-import org.springframework.context.annotation.Import
-import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.HttpMethod
-import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
-import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.TestPropertySource
-import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.test.web.reactive.server.WebTestClient
 import org.springframework.web.reactive.accept.RequestedContentTypeResolver
-import org.springframework.web.reactive.function.BodyInserters
-import kotlin.test.assertEquals
 
 @WebFluxTest(AuthController::class)
 @TestPropertySource(properties = [

@@ -1,6 +1,5 @@
 package id.co.bni.paymentauthenticationservice.common.errorhandlers
 
-import com.fasterxml.jackson.databind.exc.MismatchedInputException
 import id.co.bni.paymentauthenticationservice.applications.controllers.dtos.MetaResponse
 import id.co.bni.paymentauthenticationservice.applications.controllers.dtos.WebResponse
 import id.co.bni.paymentauthenticationservice.commons.errorhandlers.ErrorHandler
