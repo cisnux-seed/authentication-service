@@ -53,13 +53,13 @@ spec:
             - name: REFRESH_TOKEN_EXPIRATION
               value: "86400000"
             - name: DATABASE_LOG_LEVEL
-              value: "INFO"
+              value: "ERROR"
             - name: SECURITY_LOG_LEVEL
-              value: "INFO"
+              value: "ERROR"
             - name: WEB_LOG_LEVEL
-              value: "INFO"
+              value: "ERROR"
             - name: ROOT_LOG_LEVEL
-              value: "INFO"
+              value: "ERROR"
             - name: APP_LOG_LOCATION
               value: "/var/log/authentication-service-log"
             - name: OTEL_EXPORTER_OTLP_ENDPOINT
@@ -70,13 +70,6 @@ spec:
           volumeMounts:
             - name: log-volume
               mountPath: /var/log/authentication-service-log
-          resources:
-            requests:
-              memory: "256Mi"
-              cpu: "100m"
-            limits:
-              memory: "512Mi"
-              cpu: "500m"
           livenessProbe:
             httpGet:
               path: /actuator/health
