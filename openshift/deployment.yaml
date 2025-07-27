@@ -58,6 +58,18 @@ spec:
               value: "INFO"
             - name: WEB_LOG_LEVEL
               value: "INFO"
+            - name: ROOT_LOG_LEVEL
+              value: "INFO"
+            - name: APP_LOG_LOCATION
+              value: "/var/log/authentication-service-log"
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: "http://otel-collector.observability-one-gate-payment.svc.cluster.local:4317"
+            - name: ENVIRONMENT
+              value: "production"
+
+          volumeMounts:
+            - name: log-volume
+              mountPath: /var/log/authentication-service-log
           resources:
             requests:
               memory: "256Mi"
@@ -80,3 +92,21 @@ spec:
             periodSeconds: 10
             timeoutSeconds: 5
           imagePullPolicy: Always
+      volumes:
+        - name: log-volume
+          persistentVolumeClaim:
+            claimName: authentication-logs-pvc
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: authentication-logs-pvc
+  namespace: one-gate-payment
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi
+  storageClassName: ssd-csi

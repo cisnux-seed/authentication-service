@@ -9,4 +9,8 @@ WORKDIR /$APP_DIR
 COPY --from=build /app/build/libs/*.jar authentication.jar
 ENV PROFILE_MODE=prod
 EXPOSE 8080
+
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+  CMD wget --no-verbose --tries=1 --spider http://localhost:8080/actuator/health || exit 1
+
 ENTRYPOINT ["sh", "-c", "java -Dspring.profiles.active=$PROFILE_MODE -jar authentication.jar"]

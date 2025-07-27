@@ -32,11 +32,11 @@ class AuthServiceImpl(
     AuthService, Loggable {
     override suspend fun authenticate(user: UserAuth): AuthResponse = withContext(Dispatchers.Default) {
         val existedUser = userService.getByUsername(user.username) ?: throw APIException.UnauthenticatedException(
-            message = "invalid email or password"
+            message = INVALID_EMAIL_OR_PASSWORD
         )
         if (!encoder.matches(user.password, existedUser.password)) {
             throw APIException.UnauthenticatedException(
-                message = "invalid email or password"
+                message = INVALID_EMAIL_OR_PASSWORD
             )
         }
         val accessToken = tokenManager.generate(
@@ -69,14 +69,14 @@ class AuthServiceImpl(
         val isUsernameExists = userService.isUsernameAvailable(user.username)
         if (!isUsernameExists) {
             throw APIException.UnauthenticatedException(
-                message = "username or email already exists"
+                message = EMAIL_OR_USERNAME_ALREADY_EXIST
             )
         }
 
         val isEmailExists = userService.isEmailAvailable(user.email)
         if (!isEmailExists) {
             throw APIException.UnauthenticatedException(
-                message = "username or email already exists"
+                message = EMAIL_OR_USERNAME_ALREADY_EXIST
             )
         }
 
@@ -141,6 +141,8 @@ class AuthServiceImpl(
 
     private companion object{
         const val TOKEN_EXPIRED_MESSAGE = "token is invalid or expired"
+        const val INVALID_EMAIL_OR_PASSWORD = "email or password is invalid"
+        const val EMAIL_OR_USERNAME_ALREADY_EXIST = "username or email already exists"
     }
 
 }
