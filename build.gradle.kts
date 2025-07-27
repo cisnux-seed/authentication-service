@@ -27,8 +27,8 @@ dependencies {
     val springMockkVersion = "4.0.2"
     val argon2Version = "1.81"
     val slf4jVersion = "1.10.2"
-    val openTelemetryVersion = "1.52.0"
-    val openTelemetryInstrumentationVersion = "2.18.1"
+    val openTelemetryVersion = "1.42.1"
+    val openTelemetryInstrumentationVersion = "2.6.0"
 
     implementation(platform("io.opentelemetry:opentelemetry-bom:$openTelemetryVersion"))
     implementation(platform("io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom:$openTelemetryInstrumentationVersion"))
