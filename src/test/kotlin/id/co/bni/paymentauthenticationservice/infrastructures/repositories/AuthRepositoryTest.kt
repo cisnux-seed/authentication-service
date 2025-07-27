@@ -2,7 +2,6 @@ package id.co.bni.paymentauthenticationservice.infrastructures.repositories
 
 import id.co.bni.paymentauthenticationservice.domains.entities.Authentication
 import id.co.bni.paymentauthenticationservice.infrastructures.repositories.dao.AuthenticationDao
-import io.mockk.MockKAnnotations
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -10,7 +9,6 @@ import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertNotNull
 import org.junit.jupiter.api.assertThrows
