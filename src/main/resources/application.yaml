@@ -32,8 +32,8 @@ logging:
     org.springframework.web: ${WEB_LOG_LEVEL:DEBUG}
     root: ${ROOT_LOG_LEVEL:INFO}
   pattern:
-    console: %d{yyyy-MM-dd HH:mm:ss.SSS} | ${spring.application.name} | %logger | %M | %X{traceId} | %msg%n
-    file: %d{yyyy-MM-dd HH:mm:ss.SSS} | ${spring.application.name} | %logger | %M | %X{traceId} | %msg%n
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} | ${spring.application.name} | %logger | %M | %X{traceId} | %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} | ${spring.application.name} | %logger | %M | %X{traceId} | %msg%n"
   file:
     name: ${APP_LOG_LOCATION:authentication-service-log}/${spring.application.name}.log
   logback:
