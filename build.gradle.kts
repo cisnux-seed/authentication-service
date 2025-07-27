@@ -26,6 +26,7 @@ dependencies {
     val mockkVersion = "1.14.5"
     val springMockkVersion = "4.0.2"
     val argon2Version = "1.81"
+    val slf4jVersion = "1.10.2"
 
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.boot:spring-boot-starter-data-r2dbc")
@@ -38,7 +39,9 @@ dependencies {
     implementation("org.bouncycastle:bcprov-jdk18on:$argon2Version")
     implementation("io.jsonwebtoken:jjwt-api:$jwtVersion")
     implementation("io.jsonwebtoken:jjwt-impl:$jwtVersion")
+    implementation("io.opentelemetry.instrumentation:opentelemetry-spring-boot-starter")
     runtimeOnly("io.jsonwebtoken:jjwt-jackson:$jwtVersion")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-slf4j:$slf4jVersion")
     runtimeOnly("org.postgresql:postgresql")
     runtimeOnly("org.postgresql:r2dbc-postgresql")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
