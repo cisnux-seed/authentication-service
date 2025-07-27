@@ -1,6 +1,6 @@
 plugins {
-    kotlin("jvm") version "1.9.25"
-    kotlin("plugin.spring") version "1.9.25"
+    kotlin("jvm") version "2.1.0"
+    kotlin("plugin.spring") version "2.1.0"
     id("org.springframework.boot") version "3.5.3"
     id("io.spring.dependency-management") version "1.1.7"
     id("org.sonarqube") version "6.2.0.5505"
@@ -27,6 +27,11 @@ dependencies {
     val springMockkVersion = "4.0.2"
     val argon2Version = "1.81"
     val slf4jVersion = "1.10.2"
+    val openTelemetryVersion = "1.52.0"
+    val openTelemetryInstrumentationVersion = "2.18.1"
+
+    implementation(platform("io.opentelemetry:opentelemetry-bom:$openTelemetryVersion"))
+    implementation(platform("io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom:$openTelemetryInstrumentationVersion"))
 
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.boot:spring-boot-starter-data-r2dbc")
