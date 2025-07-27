@@ -28,8 +28,8 @@ pipeline {
                                 -Dsonar.projectName='authentication-service' \\
                                 -Dsonar.host.url=\${SONARQUBE_URL} \\
                                 -Dsonar.token=\${SONAR_TOKEN} \\
-                                -Dsonar.coverage.jacoco.xmlReportPaths=build/reports/jacoco/test/jacocoTestReport.xml \
-                                -Dsonar.junit.reportPaths=build/test-results/test \
+                                -Dsonar.coverage.jacoco.xmlReportPaths=build/reports/jacoco/test/jacocoTestReport.xml \\
+                                -Dsonar.junit.reportPaths=build/test-results/test \\
                                 --no-daemon \\
                                 --console=plain \\
                                 --quiet
