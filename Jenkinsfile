@@ -59,7 +59,7 @@ pipeline {
                                 echo "Running SAST analysis with SonarQube..."
 
                             sh """
-                                gradle sonar \\
+                                gradle clean test jacocoTestReport sonar \\
                                 -Dsonar.projectKey=authentication-service \\
                                 -Dsonar.projectName='authentication-service' \\
                                 -Dsonar.host.url=\${SONARQUBE_URL} \\
