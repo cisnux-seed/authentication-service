@@ -39,7 +39,7 @@ pipeline {
                             retry(10) {
                                 sh '''
                                     echo "Attempting to connect to localhost:5432..."
-                                    if curl -v --connect-timeout 5 --max-time 5 curl -v telnet://postgresql-service.one-gate-payment.svc.cluster.local:5432 >/dev/null 2>&1; then
+                                    if curl -v --connect-timeout 5 --max-time 5 telnet://postgresql-service.one-gate-payment.svc.cluster.local:5432 >/dev/null 2>&1; then
                                         echo "✅ Successfully connected to localhost:5432"
                                     else
                                         echo "❌ Connection attempt failed, retrying..."
