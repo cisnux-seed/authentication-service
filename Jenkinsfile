@@ -19,19 +19,6 @@ pipeline {
         stage('Testing'){
             failFast true
             parallel{
-                stage('Unit Tests'){
-                    steps {
-                        script {
-                            echo "Running unit tests..."
-
-                            sh """
-                                gradle clean test jacocoTestReport --no-daemon --console=plain
-
-                                echo "✅ Unit tests completed"
-                            """
-                        }
-                    }
-                }
                 stage('Integration Tests') {
                     steps {
                         script {
@@ -55,7 +42,7 @@ pipeline {
                         }
                     }
                 }
-                stage('SAST Analysis') {
+                stage('Unit Test & SAST Analysis') {
                    steps {
                         withCredentials([string(credentialsId: 'sonarqube-auth-service-token', variable: 'SONAR_TOKEN')]) {
                             script {
@@ -63,17 +50,17 @@ pipeline {
 
                             sh """
                                 gradle clean test jacocoTestReport sonar \\
-                                -Dsonar.projectKey=authentication-service \\
-                                -Dsonar.projectName='authentication-service' \\
-                                -Dsonar.host.url=\${SONARQUBE_URL} \\
-                                -Dsonar.token=\${SONAR_TOKEN} \\
-                                -Dsonar.coverage.jacoco.xmlReportPaths=build/reports/jacoco/test/jacocoTestReport.xml \\
-                                -Dsonar.junit.reportPaths=build/test-results/test \\
-                                --no-daemon \\
-                                --console=plain \\
-                                --quiet
+                                    -Dsonar.projectKey=authentication-service \\
+                                    -Dsonar.projectName='authentication-service' \\
+                                    -Dsonar.host.url=\${SONARQUBE_URL} \\
+                                    -Dsonar.token=\${SONAR_TOKEN} \\
+                                    -Dsonar.coverage.jacoco.xmlReportPaths=build/reports/jacoco/test/jacocoTestReport.xml \\
+                                    -Dsonar.junit.reportPaths=build/test-results/test \\
+                                    --no-daemon \\
+                                    --console=plain \\
+                                    --quiet
 
-                                    echo "✅ SAST analysis completed"
+                                    echo "✅✅ Unit Test & SAST analysis completed"
                                 """
                             }
                         }
