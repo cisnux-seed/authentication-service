@@ -16,14 +16,50 @@ pipeline {
     }
 
     stages {
-        stage('SAST Analysis') {
-            steps {
-                withCredentials([string(credentialsId: 'sonarqube-auth-service-token', variable: 'SONAR_TOKEN')]) {
-                    script {
-                        echo "Running SAST analysis with SonarQube..."
+        stage('Testing'){
+            parallel{
+                stage('Unit Tests'){
+                    steps {
+                        script {
+                            echo "Running unit tests..."
 
-                        sh """
-                            gradle clean test jacocoTestReport sonar \\
+                            sh """
+                                gradle clean test jacocoTestReport --no-daemon --console=plain
+
+                                echo "✅ Unit tests completed"
+                            """
+                        }
+                    }
+                }
+                stage('Integration Tests') {
+                    steps {
+                        script {
+                            echo "Running integration tests..."
+
+                            retry(10) {
+                                sh '''
+                                    echo "Attempting to connect to localhost:5432..."
+                                    if curl -v --connect-timeout 5 --max-time 5 curl -v telnet://postgresql-service.one-gate-payment.svc.cluster.local:5432 >/dev/null 2>&1; then
+                                        echo "✅ Successfully connected to localhost:5432"
+                                    else
+                                        echo "❌ Connection attempt failed, retrying..."
+                                        sleep 5
+                                        exit 1
+                                    fi
+                                '''
+                            }
+                            echo "Database is ready!"
+                        }
+                    }
+                }
+                stage('SAST Analysis') {
+                   steps {
+                        withCredentials([string(credentialsId: 'sonarqube-auth-service-token', variable: 'SONAR_TOKEN')]) {
+                            script {
+                                echo "Running SAST analysis with SonarQube..."
+
+                            sh """
+                                gradle sonar \\
                                 -Dsonar.projectKey=authentication-service \\
                                 -Dsonar.projectName='authentication-service' \\
                                 -Dsonar.host.url=\${SONARQUBE_URL} \\
@@ -34,10 +70,13 @@ pipeline {
                                 --console=plain \\
                                 --quiet
 
-                            echo "✅ SAST analysis completed"
-                        """
-                    }
+                                    echo "✅ SAST analysis completed"
+                                """
+                            }
+                        }
+                   }
                 }
+
             }
         }
 
