@@ -39,14 +39,13 @@ pipeline {
 
                             retry(10) {
                                 sh '''
-                                    echo "Attempting to connect to localhost:5432..."
-                                    OUTPUT=$(curl -v --connect-timeout 5 --max-time 5 telnet://postgresql-service.one-gate-payment.svc.cluster.local:5432 2>&1)
+                                    echo "Attempting to connect to PostgreSQL..."
 
-                                    if echo "$OUTPUT" | grep -q "Connected to"; then
+                                    # Direct pipe approach - no command substitution
+                                    if curl -v --connect-timeout 5 --max-time 5 telnet://postgresql-service.one-gate-payment.svc.cluster.local:5432 2>&1 | grep -q "Connected to"; then
                                         echo "✅ Successfully connected to PostgreSQL"
                                     else
                                         echo "❌ Connection attempt failed, retrying..."
-                                        echo "Curl output: $OUTPUT"
                                         sleep 5
                                         exit 1
                                     fi
