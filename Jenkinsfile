@@ -119,6 +119,7 @@ EOF
                         oc apply -f openshift/secrets.yaml
                         oc apply -f openshift/service.yaml
                         oc apply -f openshift/deployment.yaml
+                        oc apply -f openshift/hpa.yaml
 
                         echo "✅ OpenShift resources applied successfully"
                     """
