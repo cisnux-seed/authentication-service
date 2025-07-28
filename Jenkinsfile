@@ -19,6 +19,7 @@ pipeline {
         stage('Testing'){
             failFast true
             parallel{
+             // FIrst running integration tests
                 stage('Integration Tests') {
                     steps {
                         script {
@@ -42,6 +43,7 @@ pipeline {
                         }
                     }
                 }
+                // Then running unit tests and SAST analysis in sonarqube
                 stage('Unit Test & SAST Analysis') {
                    steps {
                         withCredentials([string(credentialsId: 'sonarqube-auth-service-token', variable: 'SONAR_TOKEN')]) {
@@ -69,7 +71,7 @@ pipeline {
 
             }
         }
-
+        //
         stage('Build with OpenShift BuildConfig') {
             steps {
                 script {
