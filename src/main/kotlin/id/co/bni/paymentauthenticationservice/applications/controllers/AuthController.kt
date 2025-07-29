@@ -3,6 +3,7 @@ package id.co.bni.paymentauthenticationservice.applications.controllers
 import id.co.bni.paymentauthenticationservice.applications.controllers.dtos.AuthResponse
 import id.co.bni.paymentauthenticationservice.applications.controllers.dtos.MetaResponse
 import id.co.bni.paymentauthenticationservice.applications.controllers.dtos.WebResponse
+import id.co.bni.paymentauthenticationservice.commons.configs.JwtProperties
 import id.co.bni.paymentauthenticationservice.commons.logger.Loggable
 import id.co.bni.paymentauthenticationservice.domains.dtos.TokenRefresh
 import id.co.bni.paymentauthenticationservice.domains.dtos.TokenResponse
@@ -13,8 +14,11 @@ import id.co.bni.paymentauthenticationservice.domains.services.AuthService
 import id.co.bni.paymentauthenticationservice.domains.services.UserService
 import kotlinx.coroutines.slf4j.MDCContext
 import kotlinx.coroutines.withContext
+import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
+import org.springframework.http.ResponseCookie
+import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.PostMapping
@@ -22,11 +26,16 @@ import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+import java.time.Duration
 import java.util.UUID
 
 @RestController
 @RequestMapping("/api/auth")
-class AuthController(private val authService: AuthService, private val userService: UserService) : Loggable {
+class AuthController(
+    private val authService: AuthService,
+    private val userService: UserService,
+    private val jwtProperties: JwtProperties
+    ) : Loggable {
     @PostMapping(
         "/register", consumes = [MediaType.APPLICATION_JSON_VALUE], produces = [MediaType.APPLICATION_JSON_VALUE]
     )
@@ -62,7 +71,7 @@ class AuthController(private val authService: AuthService, private val userServi
     )
     suspend fun login(
         @RequestBody @Validated userAuth: UserAuth
-    ): WebResponse<AuthResponse> {
+    ): ResponseEntity<WebResponse<AuthResponse>> {
         val traceId = UUID.randomUUID().toString()
 
         return withContext(
@@ -72,13 +81,35 @@ class AuthController(private val authService: AuthService, private val userServi
 
             val authResp = authService.authenticate(userAuth)
 
+            val accessCookie = ResponseCookie.from("auth-token", authResp.accessToken)
+                .httpOnly(true)
+                .secure(true)
+                .sameSite("None")
+                .maxAge(Duration.ofMillis(jwtProperties.accessTokenExpiration))
+                .path("/")
+                .build()
+
+            val refreshCookie = ResponseCookie.from("refresh-token", authResp.refreshToken)
+                .httpOnly(true)
+                .secure(true)
+                .sameSite("None")
+                .maxAge(Duration.ofMillis(jwtProperties.refreshTokenExpiration))
+                .path("/")
+                .build()
+
             log.info("user logged in successfully: ${authResp.accessToken}")
 
-            WebResponse(
-                meta = MetaResponse(
-                    code = HttpStatus.OK.value().toString(), message = "user logged in successfully 👍🏻👍🏻🫡"
-                ), data = authResp
-            )
+            ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, accessCookie.toString())
+                .header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
+                .body(
+                    WebResponse(
+                        meta = MetaResponse(
+                            code = HttpStatus.OK.value().toString(),
+                            message = "user logged in successfully 👍🏻👍🏻🫡"
+                        ), data = authResp
+                    )
+                )
         }
     }
 
@@ -87,7 +118,7 @@ class AuthController(private val authService: AuthService, private val userServi
     )
     suspend fun refresh(
         @RequestBody @Validated tokenRefresh: TokenRefresh
-    ): WebResponse<TokenResponse> {
+    ): ResponseEntity<WebResponse<TokenResponse>> {
         val traceId = UUID.randomUUID().toString()
 
         return withContext(
@@ -97,11 +128,24 @@ class AuthController(private val authService: AuthService, private val userServi
 
             val tokenResp = authService.refresh(tokenRefresh.refreshToken)
 
-            WebResponse(
-                meta = MetaResponse(
-                    code = HttpStatus.OK.value().toString(), message = "refresh token successfully"
-                ), data = tokenResp
-            )
+            val accessCookie = ResponseCookie.from("auth-token", tokenResp.accessToken)
+                .httpOnly(true)
+                .secure(true)
+                .sameSite("None")
+                .maxAge(Duration.ofMinutes(15))
+                .path("/")
+                .build()
+
+            ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, accessCookie.toString())
+                .body(
+                    WebResponse(
+                        meta = MetaResponse(
+                            code = HttpStatus.OK.value().toString(),
+                            message = "refresh token successfully"
+                        ), data = tokenResp
+                    )
+                )
         }
     }
 

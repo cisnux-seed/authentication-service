@@ -9,6 +9,6 @@ import id.co.bni.paymentauthenticationservice.domains.entities.User
 interface AuthService {
     suspend fun authenticate(user: UserAuth): AuthResponse
     suspend fun register(user: User): String
-    suspend fun refresh(refreshToken: String): TokenResponse?
+    suspend fun refresh(refreshToken: String): TokenResponse
     suspend fun logout(refreshToken: String)
 }
