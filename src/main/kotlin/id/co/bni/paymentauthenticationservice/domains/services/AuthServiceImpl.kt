@@ -86,7 +86,7 @@ class AuthServiceImpl(
         )
     }
 
-    override suspend fun refresh(refreshToken: String): TokenResponse? = try {
+    override suspend fun refresh(refreshToken: String): TokenResponse = try {
         val username = tokenManager.extractUsername(secretKey = jwtProperties.refreshSecret, refreshToken)
         username?.let {
             val currentUser = userService.getByUsername(username)
