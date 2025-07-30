@@ -5,6 +5,7 @@ import id.co.bni.paymentauthenticationservice.applications.controllers.dtos.Meta
 import id.co.bni.paymentauthenticationservice.applications.controllers.dtos.WebResponse
 import id.co.bni.paymentauthenticationservice.commons.configs.JwtProperties
 import id.co.bni.paymentauthenticationservice.commons.logger.Loggable
+import id.co.bni.paymentauthenticationservice.commons.utils.extractTokenFromJWT
 import id.co.bni.paymentauthenticationservice.domains.dtos.TokenRefresh
 import id.co.bni.paymentauthenticationservice.domains.dtos.TokenResponse
 import id.co.bni.paymentauthenticationservice.domains.dtos.UserAuth
@@ -19,6 +20,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseCookie
 import org.springframework.http.ResponseEntity
+import org.springframework.http.server.reactive.ServerHttpRequest
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.PostMapping
@@ -35,7 +37,7 @@ class AuthController(
     private val authService: AuthService,
     private val userService: UserService,
     private val jwtProperties: JwtProperties
-    ) : Loggable {
+) : Loggable {
     @PostMapping(
         "/register", consumes = [MediaType.APPLICATION_JSON_VALUE], produces = [MediaType.APPLICATION_JSON_VALUE]
     )
@@ -117,7 +119,8 @@ class AuthController(
         "/refresh", consumes = [MediaType.APPLICATION_JSON_VALUE], produces = [MediaType.APPLICATION_JSON_VALUE]
     )
     suspend fun refresh(
-        @RequestBody @Validated tokenRefresh: TokenRefresh
+        @RequestBody tokenRefresh: TokenRefresh,
+        request: ServerHttpRequest
     ): ResponseEntity<WebResponse<TokenResponse>> {
         val traceId = UUID.randomUUID().toString()
 
@@ -126,7 +129,9 @@ class AuthController(
         ) {
             log.info("user refreshing token: ${tokenRefresh.refreshToken}")
 
-            val tokenResp = authService.refresh(tokenRefresh.refreshToken)
+            val tokenResp =
+                authService.refresh(tokenRefresh.refreshToken?.takeIf { it.isNotBlank() }
+                    ?: extractTokenFromJWT(request))
 
             val accessCookie = ResponseCookie.from("auth-token", tokenResp.accessToken)
                 .httpOnly(true)
@@ -153,14 +158,16 @@ class AuthController(
         "/logout", consumes = [MediaType.APPLICATION_JSON_VALUE], produces = [MediaType.APPLICATION_JSON_VALUE]
     )
     suspend fun logout(
-        @RequestBody @Validated tokenRefresh: TokenRefresh
+        @RequestBody tokenRefresh: TokenRefresh,
+        request: ServerHttpRequest
     ): WebResponse<String> {
         val traceId = UUID.randomUUID().toString()
 
         return withContext(MDCContext(mapOf("traceId" to traceId))) {
             log.info("user logging out: ${tokenRefresh.refreshToken}")
 
-            authService.logout(tokenRefresh.refreshToken)
+            authService.logout(tokenRefresh.refreshToken?.takeIf { it.isNotBlank() }
+                ?: extractTokenFromJWT(request))
 
             WebResponse(
                 meta = MetaResponse(

@@ -145,6 +145,38 @@ class AuthControllerTest {
     }
 
     @Test
+    fun `should refresh token successfully with refresh-token header`() = runTest {
+        // Given
+        val refreshRequest = """{"refreshToken": null}""".trimIndent()
+
+        val tokenResponse = TokenResponse(
+            accessToken = "new-access-token"
+        )
+
+        coEvery { authService.refresh("fake-refresh-token") } returns tokenResponse
+
+        // When & Then
+        webTestClient
+            .put()
+            .uri("/api/auth/refresh")
+            .contentType(MediaType.APPLICATION_JSON)
+            .cookies {
+                it.set("refresh-token", "fake-refresh-token")
+            }
+            .bodyValue(refreshRequest)
+            .exchange()
+            .expectStatus().isOk
+            .expectHeader().contentType(MediaType.APPLICATION_JSON)
+            .expectBody()
+            .jsonPath("$.meta.code").isEqualTo("200")
+            .jsonPath("$.meta.message").isEqualTo("refresh token successfully")
+            .jsonPath("$.data.access_token").isEqualTo("new-access-token")
+
+        // Verify
+        coVerify(exactly = 1) { authService.refresh("fake-refresh-token") }
+    }
+
+    @Test
     fun `should logout user successfully`() = runTest {
         // Given
         coEvery { authService.logout(any()) } returns Unit
@@ -154,6 +186,28 @@ class AuthControllerTest {
             .uri("/api/auth/logout")
             .contentType(MediaType.APPLICATION_JSON)
             .bodyValue("""{"refresh_token": "fake-refresh-token"}""")
+            .exchange()
+            .expectStatus().isOk
+            .expectBody()
+            .jsonPath("$.meta.code").isEqualTo("200")
+            .jsonPath("$.data").isEqualTo("user logged out successfully")
+
+        coVerify(exactly = 1) { authService.logout(any()) }
+    }
+
+    @Test
+    fun `should logout user successfully with refresh-token header`() = runTest {
+        // Given
+        coEvery { authService.logout(any()) } returns Unit
+
+        webTestClient
+            .method(HttpMethod.DELETE)
+            .uri("/api/auth/logout")
+            .contentType(MediaType.APPLICATION_JSON)
+            .cookies {
+                it.set("refresh-token", "fake-refresh-token")
+            }
+            .bodyValue("""{"refresh_token": null}""")
             .exchange()
             .expectStatus().isOk
             .expectBody()
