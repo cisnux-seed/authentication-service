@@ -9,6 +9,7 @@ import io.jsonwebtoken.security.Keys
 import org.springframework.stereotype.Component
 import java.time.Instant
 import java.util.Date
+import java.util.UUID
 
 @Component
 class JwtManager : TokenManager {
@@ -25,6 +26,7 @@ class JwtManager : TokenManager {
         allClaims["iss"] = "https://bni.co.id"
         allClaims["iat"] = Date.from(Instant.now())
         allClaims["exp"] = Date.from(expirationDate)
+        allClaims["jti"] = UUID.randomUUID().toString()
 
         return Jwts.builder()
             .claims(allClaims)
@@ -45,6 +47,7 @@ class JwtManager : TokenManager {
         allClaims["iss"] = "https://bni.co.id"
         allClaims["iat"] = Date.from(Instant.now())
         allClaims["exp"] = Date.from(expirationDate)
+        allClaims["jti"] = UUID.randomUUID().toString()
 
         return Jwts.builder()
             .claims(allClaims)
