@@ -95,9 +95,7 @@ class AuthServiceImpl(
                 ?: throw APIException.UnauthenticatedException(message = TOKEN_EXPIRED_MESSAGE)
 
             // Check if refresh token exists in Redis and is valid
-            val isRefreshTokenValid = withContext(Dispatchers.IO) {
-                tokenBlacklistService.isRefreshTokenValid(refreshToken)
-            }
+            val isRefreshTokenValid = tokenBlacklistService.isRefreshTokenValid(refreshToken)
 
             log.debug("refresh token validation: exists=$isRefreshTokenValid, username=$username, currentUser=${currentUser.username}")
 

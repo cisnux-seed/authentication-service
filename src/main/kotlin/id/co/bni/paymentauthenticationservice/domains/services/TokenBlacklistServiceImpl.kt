@@ -12,7 +12,7 @@ class TokenBlacklistServiceImpl(
     private val cacheRepository: CacheRepository
 ) : TokenBlacklistService, Loggable {
 
-    override suspend fun blacklistToken(token: String, ttlMinutes: Long) = withContext(Dispatchers.IO) {
+    override suspend fun blacklistToken(token: String, ttlMinutes: Long) = withContext(TOKEN_BLACKLIST_SCOPE) {
         try {
             val blacklistKey = CacheKeys.blacklistedTokenKey(token)
             cacheRepository.set(blacklistKey, "blacklisted", ttlMinutes)
@@ -22,7 +22,7 @@ class TokenBlacklistServiceImpl(
         }
     }
 
-    override suspend fun isTokenBlacklisted(token: String): Boolean = withContext(Dispatchers.IO) {
+    override suspend fun isTokenBlacklisted(token: String): Boolean = withContext(TOKEN_BLACKLIST_SCOPE) {
         try {
             val blacklistKey = CacheKeys.blacklistedTokenKey(token)
             val isBlacklisted = cacheRepository.isExists(blacklistKey)
@@ -34,7 +34,7 @@ class TokenBlacklistServiceImpl(
         }
     }
 
-    override suspend fun storeRefreshToken(token: String, userId: Long, ttlMinutes: Long) = withContext(Dispatchers.IO) {
+    override suspend fun storeRefreshToken(token: String, userId: Long, ttlMinutes: Long) = withContext(TOKEN_BLACKLIST_SCOPE) {
         try {
             val refreshTokenKey = CacheKeys.refreshTokenKey(token)
             val tokenData = mapOf(
@@ -49,7 +49,7 @@ class TokenBlacklistServiceImpl(
         }
     }
 
-    override suspend fun isRefreshTokenValid(token: String): Boolean = withContext(Dispatchers.IO) {
+    override suspend fun isRefreshTokenValid(token: String): Boolean = withContext(TOKEN_BLACKLIST_SCOPE) {
         try {
             val refreshTokenKey = CacheKeys.refreshTokenKey(token)
             val tokenExists = cacheRepository.isExists(refreshTokenKey)
@@ -65,7 +65,7 @@ class TokenBlacklistServiceImpl(
         }
     }
 
-    override suspend fun removeRefreshToken(token: String) = withContext(Dispatchers.IO) {
+    override suspend fun removeRefreshToken(token: String) = withContext(TOKEN_BLACKLIST_SCOPE) {
         try {
             val refreshTokenKey = CacheKeys.refreshTokenKey(token)
             val deleted = cacheRepository.delete(refreshTokenKey)
@@ -73,5 +73,9 @@ class TokenBlacklistServiceImpl(
         } catch (e: Exception) {
             log.error("Failed to remove refresh token: ${token.take(10)}...", e)
         }
+    }
+
+    private companion object {
+        val TOKEN_BLACKLIST_SCOPE = Dispatchers.IO
     }
 }
