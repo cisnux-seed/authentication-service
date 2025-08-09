@@ -11,12 +11,25 @@ spring:
         period: 0
   jackson:
     property-naming-strategy: SNAKE_CASE
+    serialization:
+      write-dates-as-timestamps: false
+    deserialization:
+      fail-on-unknown-properties: false
+    generator:
+      write-bigdecimal-as-plain: true
   main:
     web-application-type: reactive
   r2dbc:
     url: ${DB_URL}
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
+      password: ${REDIS_PASSWORD}
+      database: ${REDIS_DATABASE:0}
+      timeout: 5000ms
 server:
   port: ${SERVER_PORT:8080}
 jwt:

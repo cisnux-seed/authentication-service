@@ -7,7 +7,7 @@ metadata:
     app: authentication-service
     version: "1.0.0"
 spec:
-  replicas: 3
+  replicas: 2
   selector:
     matchLabels:
       app: authentication-service
@@ -49,7 +49,7 @@ spec:
                   name: auth-service-secrets
                   key: access-secret
             - name: ACCESS_TOKEN_EXPIRATION
-              value: "10800000"
+              value: "900000"
             - name: REFRESH_TOKEN_EXPIRATION
               value: "86400000"
             - name: DATABASE_LOG_LEVEL
@@ -66,7 +66,23 @@ spec:
               value: "http://otel-collector.observability-one-gate-payment.svc.cluster.local:4317"
             - name: ENVIRONMENT
               value: "production"
+            - name: REDIS_HOST
+              value: "redis-service"
+            - name: REDIS_PORT
+              value: "6379"
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: auth-service-secrets
+                  key: redis-password
 
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "150m"
+            limits:
+              memory: "512Mi"
+              cpu: "300m"
           volumeMounts:
             - name: log-volume
               mountPath: /var/log/authentication-service-log

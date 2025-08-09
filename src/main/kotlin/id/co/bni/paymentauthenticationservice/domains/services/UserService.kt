@@ -6,4 +6,5 @@ interface UserService {
     suspend fun getByUsername(username: String): User?
     suspend fun isUsernameAvailable(username: String): Boolean
     suspend fun isEmailAvailable(email: String): Boolean
+    suspend fun invalidateUserCache(username: String)
 }
