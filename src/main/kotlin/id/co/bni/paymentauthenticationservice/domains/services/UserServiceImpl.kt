@@ -15,7 +15,7 @@ class UserServiceImpl(
     private val cacheRepository: CacheRepository
 ) : UserService, Loggable {
 
-    override suspend fun getByUsername(username: String): User? = withContext(Dispatchers.IO) {
+    override suspend fun getByUsername(username: String): User? = withContext(USER_SCOPE) {
         val cacheKey = CacheKeys.userKey(username)
         var user = cacheRepository.get(cacheKey, User::class.java)
 
@@ -49,5 +49,9 @@ class UserServiceImpl(
         } catch (e: Exception) {
             log.error("Failed to invalidate user cache for username: $username", e)
         }
+    }
+
+    private companion object{
+        val USER_SCOPE = Dispatchers.IO
     }
 }
