@@ -33,6 +33,7 @@ dependencies {
     implementation(platform("io.opentelemetry:opentelemetry-bom:$openTelemetryVersion"))
     implementation(platform("io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom:$openTelemetryInstrumentationVersion"))
 
+    implementation("org.springframework.boot:spring-boot-starter-data-redis-reactive")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.boot:spring-boot-starter-data-r2dbc")
     implementation("org.springframework.boot:spring-boot-starter-webflux")
